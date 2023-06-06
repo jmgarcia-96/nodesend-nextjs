@@ -14,26 +14,26 @@ dotenv.config();
 conectarDB();
 
 // Configurar CORS
-// const whitelist = [process.env.FRONTEND_URL_LH, process.env.FRONTEND_URL_LH_IP];
+const whitelist = [process.env.FRONTEND_URL_LH, process.env.FRONTEND_URL_LH_IP];
 
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (whitelist.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Error de Cors"));
-//     }
-//   },
-// };
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Error de Cors"));
+    }
+  },
+};
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 // ROUTING
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/enlaces", enlaceRoutes);
 app.use("/api/archivos", archivoRoutes);
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 
 const servidor = app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);

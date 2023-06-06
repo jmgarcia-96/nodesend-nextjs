@@ -60,4 +60,8 @@ const autenticar = async (req, res) => {
   }
 };
 
-export { registrar, autenticar };
+const usuarioAutenticado = async (req, res) => {
+  res.json({ usuario: req.usuario });
+};
+
+export { registrar, autenticar, usuarioAutenticado };
