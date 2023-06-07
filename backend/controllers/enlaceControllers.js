@@ -5,7 +5,6 @@ import { validationResult } from "express-validator";
 
 const nuevoEnlace = async (req, res) => {
   const errores = validationResult(req);
-  console.log(errores);
   if (!errores.isEmpty()) {
     return res.status(400).json({ errores: errores.array() });
   }
@@ -66,16 +65,13 @@ const obtenerEnlace = async (req, res, next) => {
   }
 
   // Si el enlace existe
-  res.json({ archivo: enlace.nombre });
+  res.json({ archivo: enlace.nombre, password: false });
 
   next();
 };
 
 const tienePassword = async (req, res, next) => {
-  // console.log(req.params.url);
   const { url } = req.params;
-
-  console.log(url);
 
   // Verificar si existe el enlace
   const enlace = await Enlace.findOne({ url });
@@ -92,4 +88,26 @@ const tienePassword = async (req, res, next) => {
   next();
 };
 
-export { nuevoEnlace, obtenerEnlace, todosEnlaces, tienePassword };
+const verificarPassword = async (req, res, next) => {
+  const { url } = req.params;
+  const { password } = req.body;
+
+  // Consultar por el enlace
+  const enlace = await Enlace.findOne({ url });
+
+  // Verificar el password
+  if (bcrypt.compareSync(password, enlace.password)) {
+    // Permitirle al usuario descargar el archivo
+    next();
+  } else {
+    return res.status(401).json({ msg: "Password Incorrecto" });
+  }
+};
+
+export {
+  nuevoEnlace,
+  obtenerEnlace,
+  todosEnlaces,
+  tienePassword,
+  verificarPassword,
+};

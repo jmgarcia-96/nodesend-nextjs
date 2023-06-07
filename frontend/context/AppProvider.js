@@ -14,6 +14,7 @@ import {
   AGREGAR_DESCARGAS,
 } from "../types";
 import clienteAxios from "../config/axios";
+import tokenAuth from "../config/tokenAuth";
 
 const AppContext = createContext();
 
@@ -76,6 +77,7 @@ const AppProvider = ({ children }) => {
   };
 
   const crearEnlace = async () => {
+    tokenAuth(localStorage.getItem("token"));
     const data = {
       nombre: state.nombre,
       nombre_original: state.nombre_original,

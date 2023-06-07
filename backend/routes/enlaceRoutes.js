@@ -4,16 +4,19 @@ import {
   obtenerEnlace,
   tienePassword,
   todosEnlaces,
+  verificarPassword,
 } from "../controllers/enlaceControllers.js";
-import checkAuth from "../middlewares/checkAuth.js";
 import { nuevoEnlaceValidation } from "../validations/enlace.validation.js";
+import checkAuth from "../middlewares/checkAuth.js";
 
 const router = express.Router();
 
-router.post("/", nuevoEnlaceValidation(), nuevoEnlace);
+router.post("/", checkAuth, nuevoEnlaceValidation(), nuevoEnlace);
 
 router.get("/", todosEnlaces);
 
 router.get("/:url", tienePassword, obtenerEnlace);
+
+router.post("/:url", verificarPassword, obtenerEnlace);
 
 export default router;

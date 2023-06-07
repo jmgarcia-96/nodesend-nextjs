@@ -25,17 +25,41 @@ const AuthProvider = ({ children }) => {
         : false,
     usuario: null,
     alerta: null,
-    cargando: null,
+    cargando: true,
   };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       usuarioAutenticado();
+    } else {
+      ocultarCargando();
     }
   }, []);
 
+  useEffect(() => {
+    mostrarCargando();
+    const token = localStorage.getItem("token");
+    if (token) {
+      usuarioAutenticado();
+    } else {
+      ocultarCargando();
+    }
+  }, [initialState.token]);
+
   const [state, dispatch] = useReducer(authReducer, initialState);
+
+  const mostrarCargando = () => {
+    dispatch({
+      type: MOSTRAR_CARGANDO,
+    });
+  };
+
+  const ocultarCargando = () => {
+    dispatch({
+      type: OCULTAR_CARGANDO,
+    });
+  };
 
   const registrarUsuario = async (datos) => {
     try {
@@ -95,9 +119,6 @@ const AuthProvider = ({ children }) => {
     if (!token) {
       return;
     }
-    dispatch({
-      type: MOSTRAR_CARGANDO,
-    });
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -116,9 +137,7 @@ const AuthProvider = ({ children }) => {
     } catch (error) {
       console.log(error);
     }
-    dispatch({
-      type: OCULTAR_CARGANDO,
-    });
+    ocultarCargando();
   };
 
   const cerrarSesion = () => {
@@ -140,6 +159,8 @@ const AuthProvider = ({ children }) => {
         iniciarSesion,
         usuarioAutenticado,
         cerrarSesion,
+        mostrarCargando,
+        ocultarCargando,
       }}
     >
       {children}

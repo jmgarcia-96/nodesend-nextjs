@@ -3,6 +3,7 @@ import React, { useContext, useEffect } from "react";
 import AuthContext from "../context/AuthProvider";
 import AppContext from "../context/AppProvider";
 import { useRouter } from "next/router";
+import Spinner from "./Spinner";
 
 const Header = () => {
   const router = useRouter();
@@ -24,22 +25,7 @@ const Header = () => {
 
       <div>
         {cargando ? (
-          <>
-            <div className="sk-circle">
-              <div className="sk-circle1 sk-child"></div>
-              <div className="sk-circle2 sk-child"></div>
-              <div className="sk-circle3 sk-child"></div>
-              <div className="sk-circle4 sk-child"></div>
-              <div className="sk-circle5 sk-child"></div>
-              <div className="sk-circle6 sk-child"></div>
-              <div className="sk-circle7 sk-child"></div>
-              <div className="sk-circle8 sk-child"></div>
-              <div className="sk-circle9 sk-child"></div>
-              <div className="sk-circle10 sk-child"></div>
-              <div className="sk-circle11 sk-child"></div>
-              <div className="sk-circle12 sk-child"></div>
-            </div>
-          </>
+          <Spinner />
         ) : (
           <>
             {usuario ? (

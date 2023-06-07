@@ -1,5 +1,6 @@
 import { AppProvider } from "../context/AppProvider";
 import { AuthProvider } from "../context/AuthProvider";
+import "../styles/Spinner.css";
 
 const App = ({ Component, pageProps }) => {
   return (

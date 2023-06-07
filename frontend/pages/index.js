@@ -6,7 +6,6 @@ import Link from "next/link";
 import AppContext from "../context/AppProvider";
 import Alerta from "../components/Alerta";
 export default function Home() {
-  const { usuarioAutenticado } = useContext(AuthContext);
   const { alerta, url } = useContext(AppContext);
 
   return (

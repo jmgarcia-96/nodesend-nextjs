@@ -29,8 +29,6 @@ const subirArchivo = async (req, res, next) => {
   const upload = multer(configMulter).single("archivo");
 
   upload(req, res, async (error) => {
-    console.log(req.file);
-
     if (!error) {
       res.json({ archivo: req.file.filename });
     } else {
@@ -43,7 +41,6 @@ const subirArchivo = async (req, res, next) => {
 const eliminarArchivo = async (req, res) => {
   try {
     fs.unlinkSync(__dirname + `/../uploads/${req.archivo}`);
-    console.log("Archivo Eliminado");
   } catch (error) {
     console.log(error);
   }
@@ -51,13 +48,17 @@ const eliminarArchivo = async (req, res) => {
 
 const descargarArchivo = async (req, res, next) => {
   // Obtiene el enlace
+  console.log(req.params);
   const { archivo } = req.params;
-  const enlace = await Enlace.findOne({ nombre: archivo });
-
-  const archivoDescarga = __dirname + "/../uploads/" + archivo;
+  const enlace = await Enlace.findOne({ url: archivo });
+  if (!enlace) {
+    return res.status(404).json("Lo sentimos, el enlace no está disponible");
+  }
+  const archivoDescarga = __dirname + "/../uploads/" + enlace?.nombre;
   res.download(archivoDescarga);
   // Eliminar el archivo y la entrada de la BD
   // Si las descargas son iguales a 1 - Borrar la entrada y borrar el archivo
+  console.log(enlace);
   const { descargas, nombre } = enlace;
 
   if (descargas === 1) {
