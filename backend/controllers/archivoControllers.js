@@ -1,6 +1,11 @@
 import multer from "multer";
 import shortid from "shortid";
 import fs from "fs";
+import Enlace from "../models/Enlace.js";
+
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const subirArchivo = async (req, res, next) => {
   const fileStorage = multer.diskStorage({
@@ -44,33 +49,29 @@ const eliminarArchivo = async (req, res) => {
   }
 };
 
-// const descargarArchivo = async (req, res, next) => {
+const descargarArchivo = async (req, res, next) => {
+  // Obtiene el enlace
+  const { archivo } = req.params;
+  const enlace = await Enlace.findOne({ nombre: archivo });
 
-//   // Obtiene el enlace
-//   const { archivo } = req.params;
-//   const enlace = await Enlaces.findOne({ nombre: archivo });
+  const archivoDescarga = __dirname + "/../uploads/" + archivo;
+  res.download(archivoDescarga);
+  // Eliminar el archivo y la entrada de la BD
+  // Si las descargas son iguales a 1 - Borrar la entrada y borrar el archivo
+  const { descargas, nombre } = enlace;
 
-//   const archivoDescarga = __dirname + '/../uploads/' + archivo;
-//   res.download(archivoDescarga);
+  if (descargas === 1) {
+    // Eliminar el archivo
+    req.archivo = nombre;
 
-//   // Eliminar el archivo y la entrada de la BD
-//   // Si las descargas son iguales a 1 - Borrar la entrada y borrar el archivo
-//   const { descargas, nombre } = enlace;
+    // eliminar la entrada de la bd
+    await Enlace.findOneAndRemove(enlace.id);
+    next();
+  } else {
+    // si las descargas son > a 1 - Restar 1
+    enlace.descargas--;
+    await enlace.save();
+  }
+};
 
-//   if(descargas === 1) {
-
-//       // Eliminar el archivo
-//       req.archivo = nombre;
-
-//       // eliminar la entrada de la bd
-//       await Enlaces.findOneAndRemove(enlace.id);
-//       next()
-//   } else {
-//        // si las descargas son > a 1 - Restar 1
-//        enlace.descargas--;
-//        await enlace.save();
-//   }
-
-// }
-
-export { subirArchivo, eliminarArchivo };
+export { subirArchivo, eliminarArchivo, descargarArchivo };

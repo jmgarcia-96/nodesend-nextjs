@@ -11,6 +11,7 @@ const Layout = ({ children }) => {
           href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
           rel="stylesheet"
         />
+        <link rel="stylesheet" href="styles/globals.css" />
       </Head>
 
       <div className="bg-gray-100 min-h-screen">

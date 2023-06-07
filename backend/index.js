@@ -14,19 +14,29 @@ dotenv.config();
 conectarDB();
 
 // Configurar CORS
-const whitelist = [process.env.FRONTEND_URL_LH, process.env.FRONTEND_URL_LH_IP];
+const whitelist = [
+  process.env.FRONTEND_URL_LH,
+  process.env.FRONTEND_URL_LH_IP,
+  "http://localhost:8080",
+];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Error de Cors"));
-    }
-  },
+  origin: process.env.FRONTEND_URL_LH,
 };
 
+// function (origin, callback) {
+//   console.log(origin);
+//   if (whitelist.includes(origin)) {
+//     callback(null, true);
+//   } else {
+//     callback(new Error("Error de Cors"));
+//   }
+// }
+
 app.use(cors(corsOptions));
+
+// Habilitar carpeta publica
+app.use(express.static("uploads"));
 
 // ROUTING
 app.use("/api/usuarios", usuarioRoutes);

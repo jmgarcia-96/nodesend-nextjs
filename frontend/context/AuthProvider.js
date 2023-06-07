@@ -1,28 +1,39 @@
-import { createContext, useReducer, useState } from "react";
+import { createContext, useEffect, useReducer } from "react";
 import authReducer from "../reducers/authReducer";
 import {
   CERRAR_SESION,
-  LIMPIAR_ALERTA,
+  OCULTAR_ALERTA,
   LOGIN_EXITO,
   MENSAJE_EXITOSO,
   MENSAJE_FALLIDO,
-  REGISTRO_EXITOSO,
   USUARIO_AUTENTICADO,
+  MOSTRAR_CARGANDO,
+  OCULTAR_CARGANDO,
 } from "../types";
 import clienteAxios from "../config/axios";
 import { useRouter } from "next/router";
-import tokenAuth from "../config/tokenAuth";
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const router = useRouter();
   const initialState = {
-    token: typeof window !== "undefined" ? localStorage.getItem("token") : "",
-    autenticado: typeof window !== "undefined" && localStorage.getItem("token"),
+    token: typeof window !== "undefined" && localStorage.getItem("token"),
+    autenticado:
+      typeof window !== "undefined" && localStorage.getItem("token")
+        ? true
+        : false,
     usuario: null,
     alerta: null,
+    cargando: null,
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      usuarioAutenticado();
+    }
+  }, []);
 
   const [state, dispatch] = useReducer(authReducer, initialState);
 
@@ -45,7 +56,7 @@ const AuthProvider = ({ children }) => {
     }
     setTimeout(() => {
       dispatch({
-        type: LIMPIAR_ALERTA,
+        type: OCULTAR_ALERTA,
         payload: null,
       });
       //   router.push("/login");
@@ -53,6 +64,9 @@ const AuthProvider = ({ children }) => {
   };
 
   const iniciarSesion = async (datos) => {
+    dispatch({
+      type: MOSTRAR_CARGANDO,
+    });
     try {
       const respuesta = await clienteAxios.post("/api/usuarios/login", datos);
       dispatch({
@@ -64,41 +78,54 @@ const AuthProvider = ({ children }) => {
         type: MENSAJE_FALLIDO,
         payload: { msg: error.response.data.msg, error: true },
       });
+      setTimeout(() => {
+        dispatch({
+          type: OCULTAR_ALERTA,
+          payload: null,
+        });
+      }, 3000);
     }
-    setTimeout(() => {
-      dispatch({
-        type: LIMPIAR_ALERTA,
-        payload: null,
-      });
-    }, 3000);
+    dispatch({
+      type: OCULTAR_CARGANDO,
+    });
   };
 
   const usuarioAutenticado = async () => {
     const token = localStorage.getItem("token");
-    if (token) {
-      tokenAuth(token);
+    if (!token) {
+      return;
     }
+    dispatch({
+      type: MOSTRAR_CARGANDO,
+    });
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
 
     try {
-      const respuesta = await clienteAxios("/api/usuarios/perfil");
-      dispatch({
-        type: USUARIO_AUTENTICADO,
-        payload: respuesta.data.usuario,
-      });
+      const respuesta = await clienteAxios("/api/usuarios/perfil", config);
+      if (respuesta.data.usuario) {
+        dispatch({
+          type: USUARIO_AUTENTICADO,
+          payload: respuesta.data.usuario,
+        });
+      }
     } catch (error) {
       console.log(error);
     }
-    // dispatch({
-    //   type: USUARIO_AUTENTICADO,
-    //   payload: nombre,
-    // });
+    dispatch({
+      type: OCULTAR_CARGANDO,
+    });
   };
 
   const cerrarSesion = () => {
     dispatch({
       type: CERRAR_SESION,
     });
-    router.push("/login");
+    router.push("/");
   };
 
   return (
@@ -108,6 +135,7 @@ const AuthProvider = ({ children }) => {
         autenticado: state.autenticado,
         usuario: state.usuario,
         alerta: state.alerta,
+        cargando: state.cargando,
         registrarUsuario,
         iniciarSesion,
         usuarioAutenticado,

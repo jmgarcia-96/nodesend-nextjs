@@ -1,15 +1,17 @@
 import {
   MENSAJE_EXITOSO,
-  LIMPIAR_ALERTA,
+  OCULTAR_ALERTA,
   MENSAJE_FALLIDO,
   LOGIN_EXITO,
   USUARIO_AUTENTICADO,
   CERRAR_SESION,
+  MOSTRAR_CARGANDO,
+  OCULTAR_CARGANDO,
 } from "../types";
 
 export default (state, action) => {
   switch (action.type) {
-    case LIMPIAR_ALERTA:
+    case OCULTAR_ALERTA:
     case MENSAJE_EXITOSO:
     case MENSAJE_FALLIDO:
       return {
@@ -27,6 +29,7 @@ export default (state, action) => {
       return {
         ...state,
         usuario: action.payload,
+        autenticado: true,
       };
     case CERRAR_SESION:
       localStorage.removeItem("token");
@@ -34,9 +37,19 @@ export default (state, action) => {
         ...state,
         usuario: null,
         token: null,
-        autenticado: false,
+        autenticado: null,
+      };
+    case MOSTRAR_CARGANDO:
+      return {
+        ...state,
+        cargando: true,
+      };
+    case OCULTAR_CARGANDO:
+      return {
+        ...state,
+        cargando: null,
       };
     default:
-      return;
+      return state;
   }
 };

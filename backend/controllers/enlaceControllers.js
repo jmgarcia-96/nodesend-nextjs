@@ -5,6 +5,7 @@ import { validationResult } from "express-validator";
 
 const nuevoEnlace = async (req, res) => {
   const errores = validationResult(req);
+  console.log(errores);
   if (!errores.isEmpty()) {
     return res.status(400).json({ errores: errores.array() });
   }
@@ -13,7 +14,7 @@ const nuevoEnlace = async (req, res) => {
 
   const enlace = new Enlace();
   enlace.url = shortid.generate();
-  enlace.nombre = shortid.generate();
+  enlace.nombre = nombre;
   enlace.nombre_original = nombre_original;
 
   // Si el usuario esta autenticado
@@ -44,6 +45,15 @@ const nuevoEnlace = async (req, res) => {
   }
 };
 
+const todosEnlaces = async (req, res) => {
+  try {
+    const enlaces = await Enlace.find({}).select("url -_id");
+    res.json(enlaces);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const obtenerEnlace = async (req, res, next) => {
   const { url } = req.params;
 
@@ -56,9 +66,30 @@ const obtenerEnlace = async (req, res, next) => {
   }
 
   // Si el enlace existe
-  res.json({ archivo: enlace.nombre, password: false });
+  res.json({ archivo: enlace.nombre });
 
   next();
 };
 
-export { nuevoEnlace, obtenerEnlace };
+const tienePassword = async (req, res, next) => {
+  // console.log(req.params.url);
+  const { url } = req.params;
+
+  console.log(url);
+
+  // Verificar si existe el enlace
+  const enlace = await Enlace.findOne({ url });
+
+  if (!enlace) {
+    res.status(404).json({ msg: "Ese Enlace no existe" });
+    return next();
+  }
+
+  if (enlace.password) {
+    return res.json({ password: true, enlace: enlace.url });
+  }
+
+  next();
+};
+
+export { nuevoEnlace, obtenerEnlace, todosEnlaces, tienePassword };
